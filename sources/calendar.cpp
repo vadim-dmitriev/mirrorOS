@@ -1,36 +1,50 @@
 #include <QWidget>
 #include <QGridLayout>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QLabel>
-#include <string>
-#include <QSize>
+#include <QDate>
+#include <Qt>
+
 
 #include <headers/calendar.h>
 
 Calendar::Calendar(QWidget *parent) {
-    QLabel *items[30];
-
+    QDate now = QDate::currentDate();
+    int daysInMonth = now.daysInMonth();
+    QDate firstMonthDay = now.addDays(now.day() * -1);
+    int firstMonthDayWeekIndex = firstMonthDay.dayOfWeek();
+    
     QString daysOfWeek[7] = {"Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"};
     this->setStyleSheet("background-color: #000000;"
                         "color: #ffffff");
 
-    QGridLayout *mainLayout = new QGridLayout(this);
-    QGridLayout *calLayout = new QGridLayout(this);
-    QHBoxLayout *calHeaderLayout = new QHBoxLayout(this);
+    QGridLayout *layout = new QGridLayout(this);
 
 
     for (int i=0; i < 7; i++) {
-        calHeaderLayout->addWidget(new QLabel(daysOfWeek[i]));
+        QLabel *dayOfWeekLabel = new QLabel(daysOfWeek[i]);
+        dayOfWeekLabel->setStyleSheet("font-weight: 700;"
+                                      "text-align: center;");
+        dayOfWeekLabel->setAlignment(Qt::AlignCenter);
+        layout->addWidget(dayOfWeekLabel, 0, i);
     }
 
-    for (int i=0; i < 30; i++) {
-        items[i] = new QLabel(QString::number(i));
-        calLayout->addWidget(items[i], i/7, i%7);
-    }
-    
-    mainLayout->addLayout(calHeaderLayout, 0, 0);
-    mainLayout->addLayout(calLayout, 1, 0);
+    for (int i=0; i < daysInMonth+firstMonthDayWeekIndex; i++) {
+        QLabel *dayLabel = new QLabel;
 
-    this->setLayout(mainLayout);
+        if (i >= firstMonthDayWeekIndex) {
+            dayLabel->setText(QString::number(i-firstMonthDayWeekIndex+1));
+            dayLabel->setStyleSheet("font-weight: 100;"
+                                    "text-align: right;");
+            dayLabel->setAlignment(Qt::AlignCenter);
+        }
+        
+        if (i == now.day()+firstMonthDayWeekIndex-1) {
+            dayLabel->setStyleSheet("border: 1px solid white;"
+                                    "border-radius: 25px;");
+        }
+
+        layout->addWidget(dayLabel, (i/7)+1, i%7);
+    }
+
+    this->setLayout(layout);
 }
